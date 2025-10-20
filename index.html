@@ -43,6 +43,36 @@
             font-size: 14px;
         }
 
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+            bottom: -2px;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
         .input-section {
             margin-bottom: 30px;
         }
@@ -224,6 +254,28 @@
             background: #ff5252;
         }
 
+        .command-url {
+            margin-top: 8px;
+        }
+
+        .command-url a {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .command-url a:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+        }
+
         .empty-state {
             text-align: center;
             color: #999;
@@ -264,13 +316,6 @@
             margin-bottom: 20px;
         }
 
-        .settings-row {
-            display: grid;
-            grid-template-columns: 1fr 200px;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
         .settings-input {
             display: flex;
             gap: 10px;
@@ -278,7 +323,7 @@
         }
 
         .settings-input input {
-            flex: 1;
+            width: 80px;
             padding: 10px;
             border: 2px solid #ddd;
             border-radius: 5px;
@@ -288,20 +333,27 @@
         .settings-input span {
             color: #666;
             font-weight: 600;
-            min-width: 40px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         @media (max-width: 768px) {
-            .settings-row {
-                grid-template-columns: 1fr;
-            }
-
             .stats {
                 grid-template-columns: 1fr;
             }
 
             .button-group {
                 flex-direction: column;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
             }
         }
     </style>
@@ -337,16 +389,39 @@
             <p class="format-hint">Você receberá um alerta X minutos antes do horário de envio.</p>
         </div>
 
-        <div class="input-section">
-            <label for="commandInput">Cole os comandos aqui:</label>
-            <textarea id="commandInput" placeholder="136 (231|288)	Aríete	72:01:52	2025-10-19 12:58:08&#10;Minha Aldeia (500|500)	Batedor	01:30:00	2025-10-20 10:00:00"></textarea>
-            <p class="format-hint">Formato: Nome da Aldeia (X|Y) [TAB] Unidade [TAB] Tempo de Viagem [TAB] Data e Hora de Envio</p>
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('twstats')">📊 TwStats</button>
+            <button class="tab-button" onclick="switchTab('planner')">📅 Novo Planejador</button>
         </div>
 
-        <div class="button-group">
-            <button class="btn-schedule" onclick="scheduleCommands()">📅 Agendar Ataques</button>
-            <button class="btn-clear" onclick="clearInput()">🗑️ Limpar</button>
-            <button class="btn-delete-all" onclick="deleteAllCommands()">🗑️ Deletar Tudo</button>
+        <!-- TAB: TwStats -->
+        <div id="twstats" class="tab-content active">
+            <div class="input-section">
+                <label for="commandInputTwstats">Cole os comandos do TwStats:</label>
+                <textarea id="commandInputTwstats" placeholder="136 (231|288)	Aríete	72:01:52	2025-10-19 12:58:08&#10;Minha Aldeia (500|500)	Batedor	01:30:00	2025-10-20 10:00:00"></textarea>
+                <p class="format-hint">Formato: Nome da Aldeia (X|Y) [TAB] Unidade [TAB] Tempo de Viagem [TAB] Data e Hora de Envio</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-schedule" onclick="scheduleCommandsTwstats()">📅 Agendar Ataques</button>
+                <button class="btn-clear" onclick="clearInputTwstats()">🗑️ Limpar</button>
+                <button class="btn-delete-all" onclick="deleteAllCommands()">🗑️ Deletar Tudo</button>
+            </div>
+        </div>
+
+        <!-- TAB: Novo Planejador -->
+        <div id="planner" class="tab-content">
+            <div class="input-section">
+                <label for="commandInputPlanner">Cole os comandos do Novo Planejador:</label>
+                <textarea id="commandInputPlanner" placeholder="[table][**]Unidade[||]From[||]Prioridade[||]Tempo de envio[||]Comando[||]Estado[/**]&#10;[*][unit]ram[/unit][|] 205|223 [|][b][color=#ff0000][/b][|]21/10/2025 09:02:59[|][url=https://br135.tribalwars.com.br/game.php?&village=202235&screen=place&x=346&y=359]Send[/url][|]"></textarea>
+                <p class="format-hint">Cole a tabela completa do planejador (com cabeçalho e linhas)</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-schedule" onclick="scheduleCommandsPlanner()">📅 Agendar Ataques</button>
+                <button class="btn-clear" onclick="clearInputPlanner()">🗑️ Limpar</button>
+                <button class="btn-delete-all" onclick="deleteAllCommands()">🗑️ Deletar Tudo</button>
+            </div>
         </div>
 
         <div class="scheduled-list">
@@ -360,7 +435,26 @@
         let scheduledCommands = [];
         let notificationIntervals = [];
 
-        // Carregar dados do localStorage ao iniciar
+        // ==================== GERENCIAMENTO DE ABAS ====================
+        function switchTab(tabName) {
+            // Esconder todas as abas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remover active de todos os botões
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Mostrar aba selecionada
+            document.getElementById(tabName).classList.add('active');
+
+            // Marcar botão como ativo
+            event.target.classList.add('active');
+        }
+
+        // ==================== ARMAZENAMENTO ====================
         function loadFromStorage() {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
@@ -378,7 +472,6 @@
             }
         }
 
-        // Salvar dados no localStorage
         function saveToStorage() {
             try {
                 const data = scheduledCommands.map(cmd => ({
@@ -392,11 +485,11 @@
             }
         }
 
-        function parseCommandLine(line) {
+        // ==================== PARSER TWSTATS ====================
+        function parseTwstatsLine(line) {
             const trimmed = line.trim();
             if (!trimmed) return null;
 
-            // Regex para capturar: aldeia/coordenada, unidade, tempo de viagem, data/hora
             const match = trimmed.match(/^(.+?)\t(.+?)\t(\d{2}:\d{2}:\d{2})\t(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})$/);
 
             if (!match) {
@@ -405,7 +498,6 @@
 
             const [, villageCoordRaw, unit, travelTimeStr, sendDatetimeStr] = match;
 
-            // Separar nome da aldeia e coordenada
             const coordMatch = villageCoordRaw.match(/^(.+?)\s*\((\d{1,3}\|\d{1,3})\)$/);
             let villageName, coordinates;
 
@@ -417,11 +509,9 @@
                 coordinates = null;
             }
 
-            // Converter tempo de viagem para segundos
             const [h, m, s] = travelTimeStr.split(':').map(Number);
             const travelTimeSeconds = h * 3600 + m * 60 + s;
 
-            // Converter data/hora de envio para Date
             const sendDatetime = new Date(sendDatetimeStr.replace(' ', 'T'));
 
             if (isNaN(sendDatetime.getTime())) {
@@ -436,12 +526,75 @@
                 travelTimeSeconds,
                 sendDatetime,
                 sent: false,
-                preNotified: false
+                preNotified: false,
+                format: 'twstats'
             };
         }
 
-        function scheduleCommands() {
-            const input = document.getElementById('commandInput').value;
+        // ==================== PARSER NOVO PLANEJADOR ====================
+        function parsePlannerLine(line) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith('[table]') || trimmed.startsWith('[**]') || trimmed.startsWith('[/**]')) {
+                return null;
+            }
+
+            let unit, fromCoordinates, sendDatetime, commandUrl = '';
+
+            // FORMATO 1: Com tags [unit]...[/unit]
+            const unitMatch = trimmed.match(/\[unit\](.+?)\[\/unit\]/);
+            if (unitMatch) {
+                unit = unitMatch[1].trim();
+                
+                // Extrair From/Fonte: primeiro valor após [unit]...[/unit]
+                const partsMatch = trimmed.match(/\[\/unit\]\s*\[\|\]\s*(\d{1,3}\|\d{1,3})/);
+                if (!partsMatch) return null;
+                fromCoordinates = partsMatch[1];
+            } else {
+                // FORMATO 2: Sem tags [unit], unidade é o primeiro campo
+                const firstFieldMatch = trimmed.match(/^\[\*\](.+?)\[\|\]/);
+                if (!firstFieldMatch) return null;
+                unit = firstFieldMatch[1].trim();
+                
+                // Extrair From/Fonte: segundo campo
+                const sourceMatch = trimmed.match(/\[\*\](.+?)\[\|\]\s*(\d{1,3}\|\d{1,3})/);
+                if (!sourceMatch) return null;
+                fromCoordinates = sourceMatch[2];
+            }
+
+            // Extrair data/hora: padrão DD/MM/YYYY HH:MM:SS (com ou sem "ás")
+            const dateMatch = trimmed.match(/(\d{2})\/(\d{2})\/(\d{4})\s+(?:ás\s+)?(\d{2}):(\d{2}):(\d{2})/);
+            if (!dateMatch) return null;
+
+            const [, day, month, year, hour, minute, second] = dateMatch;
+            sendDatetime = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}`);
+
+            if (isNaN(sendDatetime.getTime())) {
+                throw new Error(`Data/hora inválida: ${day}/${month}/${year} ${hour}:${minute}:${second}`);
+            }
+
+            // Extrair URL do comando
+            const urlMatch = trimmed.match(/\[url=(.+?)\]/);
+            if (urlMatch) {
+                commandUrl = urlMatch[1];
+            }
+
+            return {
+                id: Date.now() + Math.random(),
+                villageName: `Origem: ${fromCoordinates}`,
+                coordinates: fromCoordinates,
+                unit,
+                travelTimeSeconds: 0, // Não disponível neste formato
+                sendDatetime,
+                sent: false,
+                preNotified: false,
+                format: 'planner',
+                commandUrl
+            };
+        }
+
+        // ==================== AGENDAMENTO TWSTATS ====================
+        function scheduleCommandsTwstats() {
+            const input = document.getElementById('commandInputTwstats').value;
 
             if (!input.trim()) {
                 showMessage('Por favor, insira pelo menos um comando.', 'error');
@@ -456,8 +609,8 @@
                 if (!line.trim()) continue;
 
                 try {
-                    const command = parseCommandLine(line);
-                    newCommands.push(command);
+                    const command = parseTwstatsLine(line);
+                    if (command) newCommands.push(command);
                 } catch (error) {
                     errorCount++;
                     console.error(error.message);
@@ -477,15 +630,55 @@
 
             const message = `${newCommands.length} comando(s) agendado(s) com sucesso!${errorCount > 0 ? ` (${errorCount} linha(s) com erro)` : ''}`;
             showMessage(message, 'success');
-            document.getElementById('commandInput').value = '';
+            document.getElementById('commandInputTwstats').value = '';
         }
 
+        // ==================== AGENDAMENTO NOVO PLANEJADOR ====================
+        function scheduleCommandsPlanner() {
+            const input = document.getElementById('commandInputPlanner').value;
+
+            if (!input.trim()) {
+                showMessage('Por favor, insira pelo menos um comando.', 'error');
+                return;
+            }
+
+            const lines = input.split('\n');
+            const newCommands = [];
+            let errorCount = 0;
+
+            for (const line of lines) {
+                if (!line.trim()) continue;
+
+                try {
+                    const command = parsePlannerLine(line);
+                    if (command) newCommands.push(command);
+                } catch (error) {
+                    errorCount++;
+                    console.error(error.message);
+                }
+            }
+
+            if (newCommands.length === 0) {
+                showMessage('Nenhum comando válido foi encontrado.', 'error');
+                return;
+            }
+
+            scheduledCommands = [...scheduledCommands, ...newCommands];
+            saveToStorage();
+            setupNotifications();
+            updateCommandsList();
+            updateStats();
+
+            const message = `${newCommands.length} comando(s) agendado(s) com sucesso!${errorCount > 0 ? ` (${errorCount} linha(s) com erro)` : ''}`;
+            showMessage(message, 'success');
+            document.getElementById('commandInputPlanner').value = '';
+        }
+
+        // ==================== NOTIFICAÇÕES ====================
         function setupNotifications() {
-            // Limpar intervalos antigos
             notificationIntervals.forEach(id => clearInterval(id));
             notificationIntervals = [];
 
-            // Criar novo intervalo para verificar ataques a cada segundo
             const intervalId = setInterval(() => {
                 const now = new Date();
                 const notificationMinutes = parseInt(document.getElementById('notificationMinutes').value) || 0;
@@ -495,14 +688,12 @@
                     if (!command.sent) {
                         const timeUntil = command.sendDatetime - now;
                         
-                        // Notificação de aviso antecipado
                         if (timeUntil <= notificationMs && timeUntil > (notificationMs - 1000) && !command.preNotified) {
                             sendNotification(command, true);
                             command.preNotified = true;
                             saveToStorage();
                         }
                         
-                        // Notificação de envio
                         if (now >= command.sendDatetime) {
                             sendNotification(command, false);
                             command.sent = true;
@@ -527,7 +718,6 @@
                 message = `⏰ HORA DE ENVIAR O ATAQUE!\n\nUnidade: ${command.unit}\nAldeia: ${command.villageName}${command.coordinates ? ` (${command.coordinates})` : ''}\n\nEnvie agora!`;
             }
 
-            // Notificação do navegador
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification('Tribal Wars Attack Scheduler', {
                     body: message,
@@ -535,10 +725,7 @@
                 });
             }
 
-            // Som de alerta
             playSound();
-
-            // Alerta visual
             alert(message);
         }
 
@@ -564,6 +751,7 @@
             }
         }
 
+        // ==================== INTERFACE ====================
         function updateCommandsList() {
             const list = document.getElementById('commandsList');
 
@@ -578,7 +766,7 @@
             list.innerHTML = sorted.map(cmd => {
                 const timeUntil = cmd.sendDatetime - now;
                 const isOverdue = timeUntil < 0 && !cmd.sent;
-                const isSoon = timeUntil < 300000 && timeUntil > 0; // Menos de 5 minutos
+                const isSoon = timeUntil < 300000 && timeUntil > 0;
 
                 let timeClass = '';
                 let timeText = '';
@@ -601,8 +789,10 @@
                             <div class="command-village">${cmd.villageName}${cmd.coordinates ? ` (${cmd.coordinates})` : ''}</div>
                             <div class="command-details">
                                 Unidade: <strong>${cmd.unit}</strong> • 
+                                Formato: <strong>${cmd.format === 'twstats' ? 'TwStats' : 'Novo Planejador'}</strong> •
                                 Envio: <strong>${cmd.sendDatetime.toLocaleString('pt-BR')}</strong>
                             </div>
+                            ${cmd.commandUrl ? `<div class="command-url"><a href="${cmd.commandUrl}" target="_blank" rel="noopener noreferrer">🔗 Abrir Comando</a></div>` : ''}
                         </div>
                         <div class="command-time ${timeClass}">${timeText}</div>
                         <button class="btn-remove" onclick="removeCommand(${cmd.id})">Remover</button>
@@ -646,8 +836,12 @@
             }
         }
 
-        function clearInput() {
-            document.getElementById('commandInput').value = '';
+        function clearInputTwstats() {
+            document.getElementById('commandInputTwstats').value = '';
+        }
+
+        function clearInputPlanner() {
+            document.getElementById('commandInputPlanner').value = '';
         }
 
         function showMessage(text, type) {
@@ -659,15 +853,13 @@
             }, 5000);
         }
 
-        // Solicitar permissão para notificações
+        // ==================== INICIALIZAÇÃO ====================
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // Atualizar lista a cada segundo
         setInterval(updateCommandsList, 1000);
 
-        // Carregar dados ao iniciar
         loadFromStorage();
         setupNotifications();
     </script>
